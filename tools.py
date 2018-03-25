@@ -11,4 +11,6 @@ def modulo(v):
 
 def unit_v(a, b):
     d = distance(a, b)
+    if d == 0:
+        return 0, 0
     return (a[0]-b[0])/d, (a[1]-b[1])/d
