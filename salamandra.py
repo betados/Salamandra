@@ -1,5 +1,5 @@
 import pygame
-from tools import distance, modulo, unit_v
+from tools import distance, modulo, unit_v, forty_fivers
 
 
 class Salamandra(object):
@@ -8,11 +8,11 @@ class Salamandra(object):
         self.head = [100, 100]
         # self.verts = [[100, 100], [60, 100], [20, 100]]
 
-        # FIXME por algún motivo no funciona con cantidades pares
         quant = 19
-
-        self.space = 30
-        self.verts = [[300 - (i * self.space), 100] for i in range(quant)]
+        self.space = 20
+        self.verts = [{'pos': [300 - (i * self.space), 100],
+                       'limbs': True if i == 2 or i == 7 else False,
+                       'f': None} for i in range(quant)]
         self.v_max = 0.08
         self.v = [0, 0]
         self.a = [0, 0]
@@ -35,7 +35,6 @@ class Salamandra(object):
         print('\n')
 
         self.mouse = mouse
-        # print(self.d_error, self.error_ant)
 
         for i in range(2):
             # FIXME the derivative part doesn't seem to work well
@@ -46,21 +45,30 @@ class Salamandra(object):
         self.trim_vel()
 
         for i in range(2):
-            self.verts[0][i] += self.v[i] * t
+            self.verts[0]['pos'][i] += self.v[i] * t
 
         # Calculate positions of the rest ones
         for i, vert in enumerate(self.verts[1:]):
-            u = unit_v(vert, self.verts[i - 1])
+            k = i+1
+            u = unit_v(vert['pos'], self.verts[k - 1]['pos'])
+            if vert['limbs']:
+                vert['f'] = forty_fivers(u)
             for j in range(2):
-                vert[j] = self.verts[i - 1][j] + u[j] * self.space
+                vert['pos'][j] = self.verts[k - 1]['pos'][j] + u[j] * self.space
 
-
-
-
-        # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.head[0]), int(self.head[1])), 1)
+        # actual drawing
         for vert in self.verts:
-            pygame.draw.circle(self.screen, (0, 255, 0), (int(vert[0]), int(vert[1])), 1)
-            # pygame.draw.circle(self.screen, (0, 255, 0), mouse, 2)
+            pygame.draw.circle(self.screen, (0, 255, 0), (int(vert['pos'][0]), int(vert['pos'][1])), 1)
+            if vert['limbs']:
+                for i in range(2):
+                    pygame.draw.line(self.screen, (255, 0, 0),
+                                     (int(vert['pos'][0]), int(vert['pos'][1])),
+                                     (int(vert['pos'][0] + vert['f'][i][0]), int(vert['pos'][1] + vert['f'][i][1])),
+                                     1)
+                    pygame.draw.circle(self.screen, (255, 0, 0),
+                                       (int(vert['pos'][0] + vert['f'][i][0]),
+                                        int(vert['pos'][1] + vert['f'][i][1])),
+                                       2)
 
     def trim_vel(self):
         m = modulo(self.v)
@@ -72,7 +80,7 @@ class Salamandra(object):
     def error(self):
         e = []
         for i in [0, 1]:
-            e.append(self.mouse[i] - self.verts[0][i])
+            e.append(self.mouse[i] - self.verts[0]['pos'][i])
         return e
 
     @property
