@@ -7,10 +7,13 @@ class Salamandra(object):
         self.screen = screen
         self.head = [100, 100]
         # self.verts = [[100, 100], [60, 100], [20, 100]]
-        quant = 50
-        self.space = 20
-        self.verts = [[200 - i * 20, 100] for i in range(quant)]
-        self.v_max = 0.05
+
+        # FIXME por algún motivo no funciona con cantidades pares
+        quant = 19
+
+        self.space = 30
+        self.verts = [[300 - (i * self.space), 100] for i in range(quant)]
+        self.v_max = 0.08
         self.v = [0, 0]
         self.a = [0, 0]
 
@@ -26,6 +29,10 @@ class Salamandra(object):
         self.i_error = [0, 0]
 
     def draw(self, mouse, t):
+
+        for v in enumerate(self.verts):
+            print(v)
+        print('\n')
 
         self.mouse = mouse
         # print(self.d_error, self.error_ant)
@@ -47,7 +54,9 @@ class Salamandra(object):
             for j in range(2):
                 vert[j] = self.verts[i - 1][j] + u[j] * self.space
 
-        # print(self.head, '\t', self.d_error)
+
+
+
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.head[0]), int(self.head[1])), 1)
         for vert in self.verts:
             pygame.draw.circle(self.screen, (0, 255, 0), (int(vert[0]), int(vert[1])), 1)
