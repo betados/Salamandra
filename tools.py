@@ -25,6 +25,6 @@ def forty_fivers(u):
     ps = perpendiculars(u)
     for i, p in enumerate(ps):
         for j in range(2):
-            f[i][j] = (p[j] - u[j]) * 10
+            f[i][j] = (p[j] - u[j] * 1.5) * 10
 
     return f

@@ -11,8 +11,7 @@ class Salamandra(object):
         quant = 19
         self.space = 20
         self.verts = [{'pos': [300 - (i * self.space), 100],
-                       'limbs': True if i == 2 or i == 7 else False,
-                       'f': None} for i in range(quant)]
+                       'feet': [[0, 0], [0, 0]] if i == 2 or i == 7 else None} for i in range(quant)]
         self.v_max = 0.08
         self.v = [0, 0]
         self.a = [0, 0]
@@ -51,23 +50,27 @@ class Salamandra(object):
         for i, vert in enumerate(self.verts[1:]):
             k = i+1
             u = unit_v(vert['pos'], self.verts[k - 1]['pos'])
-            if vert['limbs']:
-                vert['f'] = forty_fivers(u)
+
+            if vert['feet'] and distance(vert['feet'][1], vert['pos']) > self.space:
+                fs = forty_fivers(u)
+                for feetIndex, f in enumerate(fs):
+                    for l in range(2):
+                        vert['feet'][feetIndex][l] = vert['pos'][l] + f[l]
+
             for j in range(2):
                 vert['pos'][j] = self.verts[k - 1]['pos'][j] + u[j] * self.space
 
         # actual drawing
         for vert in self.verts:
             pygame.draw.circle(self.screen, (0, 255, 0), (int(vert['pos'][0]), int(vert['pos'][1])), 1)
-            if vert['limbs']:
+            if vert['feet']:
                 for i in range(2):
                     pygame.draw.line(self.screen, (255, 0, 0),
                                      (int(vert['pos'][0]), int(vert['pos'][1])),
-                                     (int(vert['pos'][0] + vert['f'][i][0]), int(vert['pos'][1] + vert['f'][i][1])),
+                                     (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
                                      1)
                     pygame.draw.circle(self.screen, (255, 0, 0),
-                                       (int(vert['pos'][0] + vert['f'][i][0]),
-                                        int(vert['pos'][1] + vert['f'][i][1])),
+                                       (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
                                        2)
 
     def trim_vel(self):
