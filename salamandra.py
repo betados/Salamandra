@@ -1,5 +1,6 @@
+import math
 import pygame
-from tools import distance, modulo, unit_v, forty_fivers
+from tools import *
 
 
 class Salamandra(object):
@@ -11,8 +12,11 @@ class Salamandra(object):
         quant = 19
         self.space = 20
         self.verts = [{'pos': [300 - (i * self.space), 100],
-                       'feet': [[0, 0], [0, 0]] if i == 2 or i == 7 else None} for i in range(quant)]
-        self.v_max = 0.08
+                       'feet': [[0, 0], [0, 0]] if i == 2 or i == 7 else None,
+                       'elbow': [[0, 0], [0, 0]] if i == 2 or i == 7 else None} for i in range(quant)]
+        self.ulna_radius = self.space * 0.99
+        self.humerus = self.space * 0.99
+        self.v_max = 0.03
         self.v = [0, 0]
         self.a = [0, 0]
 
@@ -29,9 +33,33 @@ class Salamandra(object):
 
     def draw(self, mouse, t):
 
-        for v in enumerate(self.verts):
-            print(v)
-        print('\n')
+        self.actualize(mouse, t)
+
+        # actual drawing
+        for vert in self.verts:
+            pygame.draw.circle(self.screen, (0, 255, 0), (int(vert['pos'][0]), int(vert['pos'][1])), 1)
+            if vert['feet']:
+                for i in range(2):
+                    # pygame.draw.line(self.screen, (255, 0, 0),
+                    #                  (int(vert['pos'][0]), int(vert['pos'][1])),
+                    #                  (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
+                    #                  1)
+                    pygame.draw.line(self.screen, (255, 0, 0),
+                                     (int(vert['pos'][0]), int(vert['pos'][1])),
+                                     (int(vert['elbow'][i][0]), int(vert['elbow'][i][1])),
+                                     1)
+                    pygame.draw.line(self.screen, (255, 0, 0),
+                                     (int(vert['elbow'][i][0]), int(vert['elbow'][i][1])),
+                                     (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
+                                     1)
+                    pygame.draw.circle(self.screen, (255, 0, 0),
+                                       (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
+                                       2)
+
+    def actualize(self, mouse, t):
+        # for v in enumerate(self.verts):
+        #     print(v)
+        # print('\n')
 
         self.mouse = mouse
 
@@ -48,30 +76,33 @@ class Salamandra(object):
 
         # Calculate positions of the rest ones
         for i, vert in enumerate(self.verts[1:]):
-            k = i+1
-            u = unit_v(vert['pos'], self.verts[k - 1]['pos'])
-
-            if vert['feet'] and distance(vert['feet'][1], vert['pos']) > self.space:
-                fs = forty_fivers(u)
-                for feetIndex, f in enumerate(fs):
-                    for l in range(2):
-                        vert['feet'][feetIndex][l] = vert['pos'][l] + f[l]
+            k = i + 1
+            u = unit_vector(vert['pos'], self.verts[k - 1]['pos'])
 
             for j in range(2):
                 vert['pos'][j] = self.verts[k - 1]['pos'][j] + u[j] * self.space
 
-        # actual drawing
-        for vert in self.verts:
-            pygame.draw.circle(self.screen, (0, 255, 0), (int(vert['pos'][0]), int(vert['pos'][1])), 1)
+
             if vert['feet']:
-                for i in range(2):
-                    pygame.draw.line(self.screen, (255, 0, 0),
-                                     (int(vert['pos'][0]), int(vert['pos'][1])),
-                                     (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
-                                     1)
-                    pygame.draw.circle(self.screen, (255, 0, 0),
-                                       (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
-                                       2)
+                print(angle(u, unit_vector(vert['pos'], vert['feet'][0])))
+                # feet position
+                if distance(vert['feet'][1], vert['pos']) > self.space \
+                        or angle(u, unit_vector(vert['pos'], vert['feet'][0])) > 3.14/2.2:
+
+                    fs = forty_fivers(u, self.space / 2)
+                    for feetIndex, f in enumerate(fs):
+                        for l in range(2):
+                            vert['feet'][feetIndex][l] = vert['pos'][l] + f[l]
+
+                # elbow position
+                for e, mult in enumerate([-1, 1]):
+                    d = distance(vert['pos'], vert['feet'][e])
+                    elbow_angle = cosTh(self.humerus, self.ulna_radius, d)
+                    alpha = elbow_angle + angle(u, unit_vector(vert['pos'], vert['feet'][e]))
+                    for j, func in enumerate([math.cos, math.sin]):
+                        vert['elbow'][e][j] = self.humerus * func(mult * alpha) + vert['pos'][j]
+
+
 
     def trim_vel(self):
         m = modulo(self.v)
