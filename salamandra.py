@@ -7,9 +7,9 @@ class Salamandra(object):
         self.screen = screen
         self.head = [100, 100]
         # self.verts = [[100, 100], [60, 100], [20, 100]]
-        quant = 10
-        self.verts = [[200-i*20, 100] for i in range(quant)]
-        self.accels = [[0, 0] for _ in range(quant)]
+        quant = 50
+        self.space = 20
+        self.verts = [[200 - i * 20, 100] for i in range(quant)]
         self.v_max = 0.05
         self.v = [0, 0]
         self.a = [0, 0]
@@ -31,23 +31,21 @@ class Salamandra(object):
         # print(self.d_error, self.error_ant)
 
         for i in range(2):
+            # FIXME the derivative part doesn't seem to work well
             self.a[i] = self.error[i] * self.kp - self.d_error[i] * self.kd
             self.v[i] += self.a[i] * t
         self.error_ant = self.error
 
-        # self.trim_vel()
-
-
-
-        v = modulo(self.v)
-        for i, vert in enumerate(self.verts[1:]):
-            u = unit_v(self.verts[i-1], vert)
-            for i in range(2):
-                vert[i] += u[i] * v * t
+        self.trim_vel()
 
         for i in range(2):
             self.verts[0][i] += self.v[i] * t
 
+        # Calculate positions of the rest ones
+        for i, vert in enumerate(self.verts[1:]):
+            u = unit_v(vert, self.verts[i - 1])
+            for j in range(2):
+                vert[j] = self.verts[i - 1][j] + u[j] * self.space
 
         # print(self.head, '\t', self.d_error)
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.head[0]), int(self.head[1])), 1)
