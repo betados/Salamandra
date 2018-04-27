@@ -35,6 +35,8 @@ class Salamandra(object):
 
         self.actualize(mouse, t)
 
+        self.debugDraw()
+
         # actual drawing
         for vert in self.verts:
             pygame.draw.circle(self.screen, (0, 255, 0), (int(vert['pos'][0]), int(vert['pos'][1])), 1)
@@ -55,6 +57,11 @@ class Salamandra(object):
                     pygame.draw.circle(self.screen, (255, 0, 0),
                                        (int(vert['feet'][i][0]), int(vert['feet'][i][1])),
                                        2)
+
+    def debugDraw(self):
+        for vert in self.verts:
+            if vert['feet']:
+
 
     def actualize(self, mouse, t):
         # for v in enumerate(self.verts):
@@ -85,6 +92,7 @@ class Salamandra(object):
 
             if vert['feet']:
                 print(angle(u, unit_vector(vert['pos'], vert['feet'][0])))
+
                 # feet position
                 if distance(vert['feet'][1], vert['pos']) > self.space \
                         or angle(u, unit_vector(vert['pos'], vert['feet'][0])) > 3.14/2.2:
