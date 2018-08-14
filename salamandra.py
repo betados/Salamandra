@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import math
 import pygame
 from tools import *
@@ -61,6 +63,7 @@ class Salamandra(object):
     def debugDraw(self):
         for vert in self.verts:
             if vert['feet']:
+                pass
 
 
     def actualize(self, mouse, t):
