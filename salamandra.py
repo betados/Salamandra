@@ -39,29 +39,32 @@ class Salamandra(object):
 
         self.actualize(mouse, t)
 
-        self.debugDraw()
+        # self.debugDraw()
 
         # actual drawing
         for vert in self.verts:
-            pygame.draw.circle(self.screen, (0, 255, 0), vert['pos'].get_comps(), 1)
+            pygame.draw.circle(self.screen, (0, 255, 0), vert['pos'].get_comps(False), 1)
             if vert['feet']:
                 for i in range(2):
                     pygame.draw.line(self.screen, (255, 0, 0),
                                      vert['pos'].get_comps(),
-                                     vert['elbow'][i].get_comps(),
+                                     vert['elbow'][i].get_comps(False),
                                      1)
                     pygame.draw.line(self.screen, (255, 0, 0),
-                                     vert['elbow'][i].get_comps(),
-                                     vert['feet'][i].get_comps(),
+                                     vert['elbow'][i].get_comps(False),
+                                     vert['feet'][i].get_comps(False),
                                      1)
                     pygame.draw.circle(self.screen, (255, 0, 0),
-                                       vert['feet'][i].get_comps(),
+                                       vert['feet'][i].get_comps(False),
                                        2)
 
     def debugDraw(self):
         for vert in self.verts:
             if vert['feet']:
-                pass
+                pygame.draw.line(self.screen, (0, 0, 255),
+                                 vert['pos'].get_comps(),
+                                 vert['feet'][0].get_comps(),
+                                 1)
 
     def actualize(self, mouse, t):
         # for v in enumerate(self.verts):
@@ -87,13 +90,13 @@ class Salamandra(object):
             vert['pos'] = self.verts[k - 1]['pos'] + u * self.space
 
             if vert['feet']:
-                print(angle(u, (vert['pos'] - vert['feet'][0]).get_unit()))
+                # print(angle(u, (vert['pos'] - vert['feet'][0])))
 
                 # feet position
-                if abs(vert['feet'][1] - vert['pos']) > self.space \
-                        or angle(u, (vert['pos'] - vert['feet'][0]).get_unit()) > 3.14 / 2.2:
+                if abs(vert['feet'][0] - vert['pos']) > self.space * 2 \
+                        or angle(u, (vert['pos'] - vert['feet'][0])) > math.pi / 2.2:
 
-                    fs = forty_fivers(u, self.space / 2)
+                    fs = forty_fivers(u, self.space * 0.5)
                     for feetIndex, f in enumerate(fs):
                         vert['feet'][feetIndex] = vert['pos'] + f
 
@@ -103,7 +106,7 @@ class Salamandra(object):
                     elbow_angle = cosTh(self.humerus, self.ulna_radius, d)
                     alpha = elbow_angle + angle(u, (vert['pos'] - vert['feet'][e]).get_unit())
                     for j, func in enumerate([math.cos, math.sin]):
-                        vert['elbow'][e].set_comp(j, self.humerus * func(mult * alpha) + vert['pos'].get_comps()[j])
+                        vert['elbow'][e].set_comp(j, self.humerus * func(mult * alpha) + vert['pos'](j))
 
     def trim_vel(self):
         if abs(self.v) > self.v_max:

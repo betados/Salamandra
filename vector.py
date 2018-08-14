@@ -31,7 +31,9 @@ class Vector(object):
             module = 99999999
         return Vector(self.x / float(module), self.y / float(module))
 
-    def get_comps(self):
+    def get_comps(self, f=True):
+        if f:
+            return self.x, self.y
         return int(self.x), int(self.y)
 
     def set_comp(self, comp, value):

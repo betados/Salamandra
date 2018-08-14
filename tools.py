@@ -31,10 +31,10 @@ def cosTh(a, b, c):
 def angle(a, b):
     # FIXME esto debería ir dentro de vector y mejor hecho
     try:
-        alpha = math.atan(a.get_comps()[1]/a.get_comps()[0])
-        beta = math.atan(b.get_comps()[1]/b.get_comps()[0])
-    except:
-        return 0
+        alpha = math.atan(a(1) / a(0))
+        beta = math.atan(b(1) / b(0))
+    except ZeroDivisionError:
+        return math.pi * 0.25
     return abs(alpha - beta)
 
 
@@ -43,13 +43,12 @@ def vector(a, b):
 
 
 def perpendiculars(u):
-    return Vector(-u.get_comps()[1], u.get_comps()[0]), Vector(u.get_comps()[1], -u.get_comps()[0])
+
+    p = Vector(-u(1), u(0)), Vector(u(1), -u(0))
+    print u, -u(1), u(0), p
+    return p
 
 
 def forty_fivers(u, sep):
-    f = [Vector(0, 0), Vector(0, 0)]
-    ps = perpendiculars(u)
-    for i, p in enumerate(ps):
-        f[i] = (p - u * 1.5) * sep
-
-    return f
+    # print u, perpendiculars(u)
+    return [(p - u*2) * sep for p in perpendiculars(u)]
