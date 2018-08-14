@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import math
+from vector import Vector
 
 
 def distance(a, b):
@@ -28,8 +29,12 @@ def cosTh(a, b, c):
 
 
 def angle(a, b):
-    alpha = math.atan(a[1]/a[0])
-    beta = math.atan(b[1]/b[0])
+    # FIXME esto debería ir dentro de vector y mejor hecho
+    try:
+        alpha = math.atan(a.get_comps()[1]/a.get_comps()[0])
+        beta = math.atan(b.get_comps()[1]/b.get_comps()[0])
+    except:
+        return 0
     return abs(alpha - beta)
 
 
@@ -38,14 +43,13 @@ def vector(a, b):
 
 
 def perpendiculars(u):
-    return (-u[1], u[0]), (u[1], -u[0])
+    return Vector(-u.get_comps()[1], u.get_comps()[0]), Vector(u.get_comps()[1], -u.get_comps()[0])
 
 
 def forty_fivers(u, sep):
-    f = [[0, 0], [0, 0]]
+    f = [Vector(0, 0), Vector(0, 0)]
     ps = perpendiculars(u)
     for i, p in enumerate(ps):
-        for j in range(2):
-            f[i][j] = (p[j] - u[j] * 1.5) * sep
+        f[i] = (p - u * 1.5) * sep
 
     return f

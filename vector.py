@@ -1,0 +1,46 @@
+from math import hypot
+
+
+class Vector(object):
+    def __init__(self, x=0.0, y=0.0):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return 'Vector(%r, %r)' % (self.x, self.y)
+
+    def __abs__(self):
+        return hypot(self.x, self.y)
+
+    def __add__(self, other):
+        x = self.x + other.x
+        y = self.y + other.y
+        return Vector(x, y)
+
+    def __sub__(self, other):
+        x = self.x - other.x
+        y = self.y - other.y
+        return Vector(x, y)
+
+    def __mul__(self, scalar):
+        return Vector(self.x * scalar, self.y * scalar)
+
+    def get_unit(self):
+        module = float(abs(self))
+        if module == 0:
+            module = 99999999
+        return Vector(self.x / float(module), self.y / float(module))
+
+    def get_comps(self):
+        return int(self.x), int(self.y)
+
+    def set_comp(self, comp, value):
+        if comp == 0:
+            self.x = value
+        else:
+            self.y = value
+
+    def __call__(self, comp=None):
+        if comp is None:
+            return self.get_comps()
+        return self.get_comps()[comp]

@@ -5,14 +5,6 @@ import sys
 from pygame.locals import *
 from salamandra import Salamandra
 
-#
-# def draw(screen, snake, food):
-#     # screen.blit(pygame.Surface(screen.get_size()), (0, 0))
-#     pygame.draw.rect(screen, RED, Rect(food, (2 * RAD, 2 * RAD)))
-#     for ring in snake["rings"]:
-#         pygame.draw.circle(screen, GREEN, (ring[0] + RAD, ring[1] + RAD), RAD)
-
-
 pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((640, 480))
