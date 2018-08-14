@@ -16,7 +16,7 @@ class Salamandra(object):
         quant = 19
         self.space = 20
         self.verts = [{'pos': Vector(300 - (i * self.space), 100),
-                       'feet': [Vector(0, 0), Vector(0, 0)] if i == 2 or i == 7 else None,
+                       'feet': [Vector(300 - (i * self.space), 80),Vector(300 - (i * self.space), 120)] if i == 2 or i == 7 else None,
                        'elbow': [Vector(0, 0), Vector(0, 0)] if i == 2 or i == 7 else None} for i in range(quant)]
         self.ulna_radius = self.space * 0.90
         self.humerus = self.space * 0.90
@@ -34,6 +34,8 @@ class Salamandra(object):
         self.error_ant = None
         self._d_error = [0, 0]
         self.i_error = [0, 0]
+
+        self.status = self.moving_feet
 
     def draw(self, mouse, t):
 
@@ -84,21 +86,21 @@ class Salamandra(object):
 
         # Calculate positions of the rest ones
         for i, vert in enumerate(self.verts[1:]):
-            k = i + 1
-            u = (vert['pos'] - self.verts[k - 1]['pos']).get_unit()
+            u = (vert['pos'] - self.verts[i]['pos']).get_unit()
 
-            vert['pos'] = self.verts[k - 1]['pos'] + u * self.space
+            vert['pos'] = self.verts[i]['pos'] + u * self.space
 
             if vert['feet']:
                 # print(angle(u, (vert['pos'] - vert['feet'][0])))
 
                 # feet position
-                if abs(vert['feet'][0] - vert['pos']) > self.space * 2 \
-                        or angle(u, (vert['pos'] - vert['feet'][0])) > math.pi / 2.2:
+                if (abs(vert['feet'][0] - vert['pos']) > self.space * 2 \
+                        or angle(u, (vert['pos'] - vert['feet'][0])) > math.pi / 2.2):
+                    self.status = self.moving_feet
+                else:
+                    self.status = self.pass_func
 
-                    fs = forty_fivers(u, self.space * 0.5)
-                    for feetIndex, f in enumerate(fs):
-                        vert['feet'][feetIndex] = vert['pos'] + f
+                self.status(u, vert)
 
                 # elbow position
                 for e, mult in enumerate([-1, 1]):
@@ -107,6 +109,15 @@ class Salamandra(object):
                     alpha = elbow_angle + angle(u, (vert['pos'] - vert['feet'][e]).get_unit())
                     for j, func in enumerate([math.cos, math.sin]):
                         vert['elbow'][e].set_comp(j, self.humerus * func(mult * alpha) + vert['pos'](j))
+
+    def moving_feet(self, u, vert):
+        fs = forty_fivers(u, self.space * 0.5)
+        for feetIndex, f in enumerate(fs):
+            # TODO hacerlo por angulos de hombro y codo, que ambos aumenten a la vez
+            vert['feet'][feetIndex] = vert['pos'] + f
+
+    def pass_func(self, *args):
+        pass
 
     def trim_vel(self):
         if abs(self.v) > self.v_max:
