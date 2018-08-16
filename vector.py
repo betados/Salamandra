@@ -1,4 +1,4 @@
-from math import hypot
+from math import hypot, cos, sin
 
 
 class Vector(object):
@@ -49,3 +49,17 @@ class Vector(object):
         if comp is None:
             return self.get_comps()
         return self.get_comps()[comp]
+
+    def _eq__(self, other):
+        if other.x == self.x and other.y == self.y:
+            return True
+        return False
+
+
+class VectorPolar(object):
+    def __init__(self, module, argument):
+        self.module = module
+        self.argument = argument
+
+    def to_cartesian(self):
+        return Vector(cos(self.argument), sin(self.argument)) * self.module
