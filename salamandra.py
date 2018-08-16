@@ -16,7 +16,7 @@ class Salamandra(object):
         quant = 19
         self.space = 20
         self.verts = [{'pos': Vector(300 - (i * self.space), 100),
-                       'feet': [Vector(300 - (i * self.space), 80),
+                       'feet': [Vector(0 - (i * self.space), 80),
                                 Vector(300 - (i * self.space), 120)] if i == 2 or i == 7 else None,
                        'elbow': [Vector(0, 0), Vector(0, 0)] if i == 2 or i == 7 else None} for i in range(quant)]
         self.ulna_radius = self.space * 0.90
@@ -93,13 +93,14 @@ class Salamandra(object):
 
             if vert['feet']:
                 # FEET position
-                if (abs(vert['feet'][0] - vert['pos']) > self.space * 2
-                        or angle(u, (vert['pos'] - vert['feet'][0])) > math.pi / 2.2):
-                    self.status = self.moving_feet
-                else:
-                    self.status = self.pass_func
+                for i in (0, 1):
+                    if (abs(vert['feet'][i] - vert['pos']) > self.space * 2
+                            or angle(u, (vert['pos'] - vert['feet'][i])) > math.pi / 2.2):
+                        self.status = self.moving_feet
+                    else:
+                        self.status = self.pass_func
 
-                self.status(u, vert)
+                    self.status(u, vert, i)
 
                 # ELBOW position
                 for e, mult in enumerate([-1, 1]):
@@ -109,11 +110,9 @@ class Salamandra(object):
                     for j, func in enumerate([math.cos, math.sin]):
                         vert['elbow'][e].set_comp(j, self.humerus * func(mult * alpha) + vert['pos'](j))
 
-    def moving_feet(self, u, vert):
+    def moving_feet(self, u, vert, feetIndex):
         fs = forty_fivers(u, self.space * 0.5)
-        for feetIndex, f in enumerate(fs):
-            # TODO hacerlo por angulos de hombro y codo, que ambos aumenten a la vez
-            vert['feet'][feetIndex] = vert['pos'] + f
+        vert['feet'][feetIndex] = vert['pos'] + fs[feetIndex]
 
     def pass_func(self, *args):
         pass
