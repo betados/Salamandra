@@ -42,6 +42,9 @@ class Vector(object):
         else:
             self.y = value
 
+    def __neg__(self):
+        return Vector(-self.x, -self.y)
+
     def __call__(self, comp=None):
         if comp is None:
             return self.get_comps()
