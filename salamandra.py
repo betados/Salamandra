@@ -5,7 +5,7 @@ import math
 import pygame
 
 from tools import angle, cosTh, forty_fivers
-from vector import Vector
+from vector import Vector, VectorPolar
 
 
 class Salamandra(object):
@@ -22,8 +22,8 @@ class Salamandra(object):
                        'shoulder angle': math.pi / 6.0,
                        'elbow angle': math.pi / 6.0,
                        } for i in range(quant)]
-        self.ulna_radius = self.space * 0.90
-        self.humerus = self.space * 0.90
+        self.ulna_radius = self.space * 0.5
+        self.humerus = self.space * 0.99
         self.v_max = 0.05
         self.v = Vector(0, 0)
         self.a = Vector(0, 0)
@@ -56,13 +56,13 @@ class Salamandra(object):
                                      vert['pos'].get_comps(),
                                      vert['elbow'][i].get_comps(False),
                                      1)
-                    # pygame.draw.line(self.screen, (255, 0, 0),
-                    #                  vert['elbow'][i].get_comps(False),
-                    #                  vert['feet'][i].get_comps(False),
-                    #                  1)
-                    # pygame.draw.circle(self.screen, (255, 0, 0),
-                    #                    vert['feet'][i].get_comps(False),
-                    #                    2)
+                    pygame.draw.line(self.screen, (255, 0, 0),
+                                     vert['elbow'][i].get_comps(False),
+                                     vert['feet'][i].get_comps(False),
+                                     1)
+                    pygame.draw.circle(self.screen, (255, 0, 0),
+                                       vert['feet'][i].get_comps(False),
+                                       2)
 
     def debugDraw(self):
         for vert in self.verts:
@@ -73,9 +73,6 @@ class Salamandra(object):
                                  1)
 
     def actualize(self, mouse, t):
-        # for v in enumerate(self.verts):
-        #     print(v)
-        # print('\n')
 
         self.mouse = Vector(*mouse)
 
@@ -91,6 +88,8 @@ class Salamandra(object):
         # Calculate positions of the rest ones
         for i, vert in enumerate(self.verts[1:]):
             u = (vert['pos'] - self.verts[i]['pos']).get_unit()
+            u_angle = angle(Vector(1, 0), u)
+            # print u_angle
             pygame.draw.line(self.screen, (200, 0, 255),
                              vert['pos'].get_comps(False),
                              (vert['pos'] - u * self.space).get_comps(False),
@@ -99,42 +98,28 @@ class Salamandra(object):
             vert['pos'] = self.verts[i]['pos'] + u * self.space
 
             if vert['feet']:
-                if vert['shoulder angle'] < math.pi / 6.0:
+                if vert['shoulder angle'] + u_angle < math.pi / 6.0:
                     self.status = self.moving_feet
-                if vert['shoulder angle'] > 5 * math.pi / 6.0:
+                if vert['shoulder angle'] + u_angle > 1 * math.pi / 2.0:
                     self.status = self.static_feet
 
-                print self.status.__name__
+                # print self.status.__name__
 
-                # # FEET position
-                # for i in (0, 1):
-                #     if (abs(vert['feet'][i] - vert['pos']) > self.space * 2
-                #             or angle(u, (vert['pos'] - vert['feet'][i])) > math.pi / 2.2):
-                #         self.status = self.moving_feet
-                #     else:
-                #         self.status = self.pass_func
-                #
-                #     self.status(u, vert, i)
-
-
-
-                # ELBOW position
+                self.status(vert)
                 for e, mult in enumerate([-1, 1]):
-                    # d = abs(vert['pos'] - vert['feet'][e])
-                    # elbow_angle = cosTh(self.humerus, self.ulna_radius, d)
-                    # alpha = elbow_angle + angle(u, (vert['pos'] - vert['feet'][e]).get_unit())
-                    for j, func in enumerate([math.cos, math.sin]):
-                        vert['elbow'][e].set_comp(j, self.humerus * func(mult * vert['shoulder angle']) + vert['pos'](j))
+                    vert['elbow'][e] = VectorPolar(self.humerus,
+                                                   mult * vert['shoulder angle'] + u_angle).to_cartesian() + vert['pos']
+                    vert['feet'][e] = VectorPolar(self.ulna_radius,
+                                                  mult * (-vert['shoulder angle']) + u_angle).to_cartesian() + vert['elbow'][e]
 
-    def moving_feet(self, u, vert, feetIndex):
-        vert['shoulder angle'] += math.pi / 80.0
-        print vert['shoulder angle']
+    def moving_feet(self, vert):
+        vert['shoulder angle'] += math.pi / 160.0
 
     def pass_func(self, *args):
         pass
 
-    def static_feet(self, u, vert, feetIndex):
-        vert['shoulder angle'] -= math.pi / 40.0
+    def static_feet(self, vert):
+        vert['shoulder angle'] -= math.pi / 160.0
 
     def trim_vel(self):
         if abs(self.v) > self.v_max:

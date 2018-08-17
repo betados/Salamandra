@@ -63,3 +63,6 @@ class VectorPolar(object):
 
     def to_cartesian(self):
         return Vector(cos(self.argument), sin(self.argument)) * self.module
+
+    def __repr__(self):
+        return 'VectorPolar(%r, %r)' % (self.module, self.argument)
