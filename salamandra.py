@@ -50,6 +50,12 @@ class Salamandra(object):
         # actual drawing
         for vert in self.verts:
             pygame.draw.circle(self.screen, (0, 255, 0), vert['pos'].get_comps(False), 1)
+
+            self.sprite_image = pygame.Surface([5, 5])
+            self.sprite_image = pygame.image.load("images/Straight_Snake.png").convert_alpha()
+
+            self.screen.blit(self.sprite_image, self.get_rect(vert['pos'], self.space),
+                             (320, 200, 50, 50))
             if vert['feet']:
                 for i in range(2):
                     pygame.draw.line(self.screen, (255, 0, 0),
@@ -64,6 +70,10 @@ class Salamandra(object):
                                        vert['feet'][i].get_comps(False),
                                        2)
 
+    @staticmethod
+    def get_rect(pos, width):
+        v = (pos - Vector(width, width / 4))
+        return v.x, v.y, width, width / 2
     def debugDraw(self):
         for vert in self.verts:
             if vert['feet']:
@@ -115,11 +125,8 @@ class Salamandra(object):
     def moving_feet(self, vert):
         vert['shoulder angle'] += math.pi / 160.0
 
-    def pass_func(self, *args):
-        pass
-
     def static_feet(self, vert):
-        vert['shoulder angle'] -= math.pi / 160.0
+        vert['shoulder angle'] -= math.pi / 80.0
 
     def trim_vel(self):
         if abs(self.v) > self.v_max:
