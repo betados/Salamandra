@@ -5,7 +5,9 @@ import math
 import pygame
 
 from tools import angle, cosTh, forty_fivers
-from vector import Vector, VectorPolar
+# from vector import Vector, VectorPolar
+from vector_2D.vector import Vector
+from vector_2D.vectorPolar import VectorPolar
 
 
 class Salamandra(object):
@@ -97,7 +99,7 @@ class Salamandra(object):
 
         # Calculate positions of the rest ones
         for i, vert in enumerate(self.verts[1:]):
-            u = (vert['pos'] - self.verts[i]['pos']).get_unit()
+            u = (vert['pos'] - self.verts[i]['pos']).unit()
             u_angle = angle(Vector(1, 0), u)
             # print u_angle
             pygame.draw.line(self.screen, (200, 0, 255),

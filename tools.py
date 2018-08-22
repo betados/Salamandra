@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import math
-from vector import Vector
+from vector_2D.vector import Vector
+from vector_2D.vectorPolar import VectorPolar
 
 
 def distance(a, b):
